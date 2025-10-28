@@ -52,27 +52,58 @@ import com.test.sky_delivery_app.view.MapActivity
 import com.test.sky_delivery_app.view.OrderScreen
 import com.test.sky_delivery_app.view.UserScreen
 import com.test.sky_delivery_app.viewmodel.HttpViewModel
+import kotlin.toString
 
 
 @Composable
-fun MainScreen() {
+fun MainScreen(viewModel: HttpViewModel) {
+    val messageList by viewModel.messageList.collectAsStateWithLifecycle()
     val navController = rememberNavController()
 
-    Scaffold(
-        bottomBar = {
-            BottomNavigationBar(navController = navController)
+    Box{
+        Scaffold(
+            bottomBar = {
+                BottomNavigationBar(navController = navController)
+            }
+        ) { innerPadding ->
+            NavHost(
+                navController = navController,
+                startDestination = "orders",
+                modifier = Modifier.padding(innerPadding)
+            ) {
+                composable("orders") { OrderScreen(viewModel) }
+                composable("delivery") { DeliveryScreen(viewModel) }
+                composable("user") { UserScreen(viewModel) }
+            }
         }
-    ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = "orders",
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            composable("orders") { OrderScreen() }
-            composable("delivery") { DeliveryScreen() }
-            composable("user") { UserScreen() }
+        messageList.forEach {mag->
+            Card (
+                modifier = Modifier
+                    .width(200.dp)
+                    .height(300.dp),
+                elevation = CardDefaults.cardElevation(4.dp)
+            ){
+                Column {
+                    Text(text = mag.orderId.toString()+"催单", fontSize = 30.sp)
+                    Box(modifier = Modifier.height(30.dp))
+                    Row (
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Button(
+                            modifier = Modifier
+                                .background(Color.Green),
+                            onClick = {
+                                viewModel.confine(mag.orderId)
+                            }
+                        ) {
+                            Text("确定")
+                        }
+                    }
+                }
+            }
         }
     }
+
 }
 
 @Composable
@@ -134,238 +165,3 @@ data class BottomNavItem(
     val unselectedIcon: ImageVector,
     val route: String
 )
-
-@Composable
-fun Greeting(
-    name: String, modifier:
-    Modifier = Modifier,okHttpController: OkHttpController,
-    viewModel: HttpViewModel
-) {
-    val messageList by viewModel.messageList.collectAsStateWithLifecycle()
-    val deliveryList by viewModel.deliveryList.collectAsStateWithLifecycle()
-    val orderList by viewModel.orderList.collectAsStateWithLifecycle()
-    var str by remember { mutableStateOf("aa") }
-    val listStatus = rememberLazyListState()
-    var dlv_success by remember {viewModel.delivery_succeeful}
-    val cpl_success by remember { viewModel.delivery_succeeful }
-    var username by remember { mutableStateOf("admin") }
-    var password by remember { mutableStateOf("123456") }
-    val context = LocalContext.current
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ){
-
-        Column (
-            horizontalAlignment = Alignment.CenterHorizontally
-        ){
-            Row {
-                Button(
-                    onClick = {
-                        val intent = Intent(context, MapActivity::class.java)
-                        context.startActivity(intent)
-                    }
-                ) { Text("地图") }
-            }
-            TextField(
-                value = username,
-                onValueChange = { username = it },
-                label = { Text("username") },
-                placeholder = { Text("username") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            TextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("password") },
-                placeholder = { Text("password") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Text(
-                text = "Hello $str!",
-                modifier = modifier
-            )
-            Row {
-                Button(
-                    onClick = {
-                        viewModel.login(
-                            username,
-                            password,
-                            {body-> str = body.toString()}
-                        )
-                    }
-                ) {Text(
-                    text = "login",
-                    modifier = modifier
-                )}
-                Button(
-                    onClick = {
-                        okHttpController.connectWS()
-                    }
-                ) {Text(
-                    text = "ws",
-                    modifier = modifier
-                )}
-                Button(
-                    onClick = {
-                        viewModel.getOrder()
-                    }
-                ) {Text(
-                    text = "orderList",
-                    modifier = modifier
-                )}
-                Button(
-                    onClick = {
-                        viewModel.getDeliveryOrder()
-                    }
-                ) {Text(
-                    text = "deliveryList",
-                    modifier = modifier
-                )}
-            }
-            Row {
-                LazyColumn(
-                    state = listStatus,
-                    modifier = Modifier
-                        .width(200.dp)
-                ) {
-
-                    items(
-                        items = orderList,
-                        key = { orderVo -> orderVo.number }
-                    ){orderVo ->
-                        OrderItem(orderVo,viewModel)
-                    }
-                }
-                LazyColumn(
-                    state = listStatus,
-                    modifier = Modifier
-                        .width(200.dp)
-                ) {
-
-                    items(
-                        items = deliveryList,
-                        key = { orderVo -> orderVo.number }
-                    ){orderVo ->
-                        DeliveryItem(orderVo,viewModel)
-                    }
-                }
-            }
-
-        }
-        if(dlv_success){
-            Card (
-                modifier = Modifier
-                    .width(200.dp)
-                    .height(300.dp),
-                elevation = CardDefaults.cardElevation(4.dp)
-            ){
-                Column {
-                    Text(text = "抢单成功", fontSize = 30.sp)
-                    Box(modifier = Modifier.height(30.dp))
-                    Row (
-                        verticalAlignment = Alignment.CenterVertically
-                    ){
-                        Button(
-                            modifier = Modifier
-                                .background(Color.Green),
-                            onClick = {
-                                viewModel.delivery_succeeful.value = false
-                            }
-                        ) {
-                            Text("确定")
-                        }
-                    }
-                }
-            }
-        }
-        messageList.forEach {mag->
-            Card (
-                modifier = Modifier
-                    .width(200.dp)
-                    .height(300.dp),
-                elevation = CardDefaults.cardElevation(4.dp)
-            ){
-                Column {
-                    Text(text = mag.orderId.toString()+"催单", fontSize = 30.sp)
-                    Box(modifier = Modifier.height(30.dp))
-                    Row (
-                        verticalAlignment = Alignment.CenterVertically
-                    ){
-                        Button(
-                            modifier = Modifier
-                                .background(Color.Green),
-                            onClick = {
-                                viewModel.confine(mag.orderId)
-                            }
-                        ) {
-                            Text("确定")
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
-
-}
-
-@Composable
-fun OrderItem(order: OrderVO,wsViewModel: HttpViewModel) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp)
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Row {
-            Text(text = order.id.toString(), style = MaterialTheme.typography.titleMedium,fontSize = 50.sp)
-            /*Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = order.number, style = MaterialTheme.typography.titleMedium)
-                Text(text = order.address, color = Color.Gray)
-                Text(text = order.phone.toString(), color = Color.Black, fontSize = 30.sp)
-            }*/
-            Column {
-                Button(
-                    onClick = {
-                        wsViewModel.delivery(order.id.toInt())
-                    }
-                ) { }
-            }
-        }
-
-    }
-}
-
-@Composable
-fun DeliveryItem(order: OrderVO,wsViewModel: HttpViewModel) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp)
-            .padding(8.dp)
-            .background(Color.Blue),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Row {
-            Text(text = order.id.toString(), style = MaterialTheme.typography.titleMedium,fontSize = 50.sp)
-            /*Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = order.number, style = MaterialTheme.typography.titleMedium)
-                Text(text = order.address, color = Color.Gray)
-                Text(text = order.phone.toString(), color = Color.Black, fontSize = 30.sp)
-            }*/
-            Column {
-                Button(
-                    onClick = {
-                        wsViewModel.complete(order.id.toInt())
-                    }
-                ) { YourKey().key }
-            }
-        }
-
-    }
-}

@@ -29,13 +29,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MainScreen()
+            MainScreen(wsViewModel)
         }
         wsViewModel.load()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        okHttpController.close()
+        wsViewModel.destroy()
     }
 }

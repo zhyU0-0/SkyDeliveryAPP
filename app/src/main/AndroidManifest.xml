@@ -12,22 +12,24 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SkyDeliveryApp">
         <activity
-            android:name=".view.MapActivity"
-            android:exported="false"
-            android:label="@string/title_activity_map"
-            android:theme="@style/Theme.SkyDeliveryApp" />
-        <activity
-            android:name=".view.MainActivity"
+            android:name=".MainActivity"
             android:exported="false"
             android:label="@string/title_activity_main"
             android:theme="@style/Theme.SkyDeliveryApp" />
         <activity
+            android:name=".view.MapActivity"
+            android:exported="false"
+            android:label="@string/title_activity_map"
+            android:theme="@style/Theme.SkyDeliveryApp" />
+
+        <activity
             android:name=".view.LoginActivity"
             android:exported="true"
             android:label="@string/title_activity_login"
-            android:theme="@style/Theme.SkyDeliveryApp" >
+            android:theme="@style/Theme.SkyDeliveryApp">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

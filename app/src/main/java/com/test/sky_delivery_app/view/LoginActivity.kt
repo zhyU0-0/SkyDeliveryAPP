@@ -27,6 +27,7 @@ import com.test.sky_delivery_app.MainActivity
 import com.test.sky_delivery_app.view.ui.theme.SkyDeliveryAppTheme
 import com.test.sky_delivery_app.viewmodel.HttpViewModel
 import com.test.sky_delivery_app.websocket.OkHttpController
+import okhttp3.Callback
 
 class LoginActivity : ComponentActivity() {
     private lateinit var sharedPreferences: SharedPreferences
@@ -43,7 +44,12 @@ class LoginActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     LoginScreen(
                         modifier = Modifier.padding(innerPadding),
-                        wsViewModel
+                        wsViewModel,
+                        {
+                            val intent = Intent(this, MainActivity::class.java)
+                            this.startActivity(intent)
+                            finish()
+                        }
                     )
                 }
             }
@@ -56,7 +62,8 @@ class LoginActivity : ComponentActivity() {
 }
 
 @Composable
-fun LoginScreen( modifier: Modifier = Modifier,viewModel: HttpViewModel) {
+fun LoginScreen( modifier: Modifier = Modifier,viewModel: HttpViewModel,
+                 goto: ()-> Unit) {
     var username by remember { mutableStateOf("admin") }
     var password by remember { mutableStateOf("123456") }
     val context = LocalContext.current
@@ -85,8 +92,8 @@ fun LoginScreen( modifier: Modifier = Modifier,viewModel: HttpViewModel) {
                         context.startActivity(intent)*/
                     }
                 )
-                val intent = Intent(context, MainActivity::class.java)
-                context.startActivity(intent)
+                goto()
+
             }
         ) { }
     }

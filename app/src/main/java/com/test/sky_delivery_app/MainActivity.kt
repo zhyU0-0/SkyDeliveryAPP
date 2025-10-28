@@ -34,6 +34,7 @@ class MainActivity : ComponentActivity() {
         wsViewModel.load()
     }
 
+
     override fun onDestroy() {
         super.onDestroy()
         wsViewModel.destroy()

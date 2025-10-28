@@ -1,6 +1,7 @@
 package com.test.sky_delivery_app
 
 import android.content.Intent
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -59,7 +61,10 @@ import kotlin.toString
 fun MainScreen(viewModel: HttpViewModel) {
     val messageList by viewModel.messageList.collectAsStateWithLifecycle()
     val navController = rememberNavController()
-
+    var showExitDialog by remember { mutableStateOf(false) }
+    BackHandler {
+        showExitDialog = true
+    }
     Box{
         Scaffold(
             bottomBar = {
@@ -138,6 +143,9 @@ fun BottomNavigationBar(navController: NavHostController) {
                 selected = currentRoute == item.route,
                 onClick = {
                     navController.navigate(item.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
                         // 避免重复点击时创建多个实例
                         launchSingleTop = true
                         // 恢复状态

@@ -137,13 +137,19 @@ class OkHttpController(private val context: Context, private val sharedPreferenc
                         val msg = jsonObject.optString("msg")
 
                         val dataObject = jsonObject.getJSONObject("data")
+
                         val token = dataObject.getString("token")
                         val userName = dataObject.getString("userName")
                         val name = dataObject.getString("name")
                         val id = dataObject.getLong("id")
 
-                        sharedPreferences.edit().putString("token",token).apply()
-                        sharedPreferences.edit().putLong("cId",id).apply()
+                        sharedPreferences.edit()
+                            .putString("token",token)
+                            .putLong("cId",id)
+                            .putString("name",name)
+                            .putString("username",userName)
+                            .apply()
+
 
                         Log.v("OKHttp",body)
                         callback(Result.success(body))

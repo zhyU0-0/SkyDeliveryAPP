@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.test.sky_delivery_app.pojo.Employee
 import com.test.sky_delivery_app.pojo.MassageDTO
 import com.test.sky_delivery_app.pojo.OrdersPageQueryDTO
 import com.test.sky_delivery_app.pojo.vo.OrderVO
@@ -39,6 +40,7 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
     val deliveryList: StateFlow<List<OrderVO>> = _deliveryList.asStateFlow()
     val delivery_succeeful = mutableStateOf(false)
     val complete_succeeful = mutableStateOf(false)
+    lateinit var employee: Employee
 
     val okHttpController =  OkHttpController(context,shapePreferences,{
         massageDTO ->
@@ -51,6 +53,14 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
         Log.v("MessageList",_messageList.toString())
     })
 
+    fun _getEmployee(): Employee{
+        employee = Employee(
+            shapePreferences.getLong("cId",0),
+            shapePreferences.getString("name","null").toString(),
+            shapePreferences.getString("username","null").toString()
+        )
+        return employee
+    }
 
     fun login(userName: String, password: String, callback: (Result<String>) -> Unit): Call {
         //登录后再次验证身份，方便获取employeeId

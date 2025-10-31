@@ -22,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import com.test.sky_delivery_app.MainActivity
 import com.test.sky_delivery_app.view.ui.theme.SkyDeliveryAppTheme
 import com.test.sky_delivery_app.viewmodel.HttpViewModel

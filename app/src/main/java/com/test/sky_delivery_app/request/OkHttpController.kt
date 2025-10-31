@@ -7,6 +7,7 @@ import com.google.gson.Gson
 import com.test.sky_delivery_app.pojo.MassageDTO
 import com.test.sky_delivery_app.pojo.OrderRecord
 import com.test.sky_delivery_app.pojo.OrderResponse
+import com.test.sky_delivery_app.pojo.Orders
 import com.test.sky_delivery_app.pojo.OrdersPageQueryDTO
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -340,5 +341,50 @@ class OkHttpController(private val context: Context, private val sharedPreferenc
             }
         })
 
+    }
+
+    fun getData(callback:(List<Orders>)->Unit){
+
+        val request = Request.Builder()
+            .url(baseUrl+"/deliver/report/data")
+            .get()
+            .addHeader("token",sharedPreferences.getString("token","").toString())
+            .build()
+        val call = client.newCall(request)
+        call.enqueue(object : Callback{
+            override fun onFailure(call: Call, e: IOException) {
+                Log.v("get Data fail",e.toString())
+            }
+
+            override fun onResponse(call: Call, response: Response){
+                val body = response.body?.string()
+                val gson = Gson()
+                if (response.isSuccessful && body != null) {
+
+                    val responseJson = JSONObject(body)
+
+                    val jsonObject = JSONObject(responseJson.toString())
+                    val code = jsonObject.getInt("code")
+                    val msg = jsonObject.optString("msg")
+
+                    val dataObject = jsonObject.getJSONArray("data")
+                    val orders: MutableList<Orders> = mutableListOf()
+                    if (dataObject.length() > 0) {
+                        var index = 0
+                        while(index < dataObject.length()){
+                            Log.v("OrderVOPage",dataObject.getJSONObject(index).toString())
+                            val data = dataObject.getJSONObject(index)
+                            val or = gson.fromJson(data.toString(), Orders::class.java)
+                            orders.add(or)
+                            index++
+                        }
+                    }
+                    callback(orders)
+                } else {
+                    callback(listOf())
+                }
+            }
+
+        })
     }
 }

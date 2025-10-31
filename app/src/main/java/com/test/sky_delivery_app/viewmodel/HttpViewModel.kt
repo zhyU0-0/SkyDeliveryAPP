@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.test.sky_delivery_app.pojo.Employee
 import com.test.sky_delivery_app.pojo.MassageDTO
+import com.test.sky_delivery_app.pojo.Orders
 import com.test.sky_delivery_app.pojo.OrdersPageQueryDTO
 import com.test.sky_delivery_app.pojo.vo.OrderVO
 import com.test.sky_delivery_app.websocket.OkHttpController
@@ -34,13 +35,19 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
     private val _messageList = MutableStateFlow<List<MassageDTO>>(emptyList())
     private val _orderList = MutableStateFlow<List<OrderVO>>(emptyList())
     private val _deliveryList = MutableStateFlow<List<OrderVO>>(emptyList())
+    private val _dataList = MutableStateFlow<List<Orders>>(emptyList())
     // 公开的不可变状态
     val messageList: StateFlow<List<MassageDTO>> = _messageList.asStateFlow()
     val orderList: StateFlow<List<OrderVO>> = _orderList.asStateFlow()
     val deliveryList: StateFlow<List<OrderVO>> = _deliveryList.asStateFlow()
+    val dataList: StateFlow<List<Orders>> = _dataList.asStateFlow()
+
     val delivery_succeeful = mutableStateOf(false)
     val complete_succeeful = mutableStateOf(false)
     lateinit var employee: Employee
+    var orderMoney = mutableStateOf(0.0)
+    var orderCount = mutableStateOf(0)
+
 
     val okHttpController =  OkHttpController(context,shapePreferences,{
         massageDTO ->
@@ -62,15 +69,34 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
         return employee
     }
 
+    fun is_auth(callback: ()-> Unit){
+        if(shapePreferences.getString("password","null").toString() != "null"){
+            val p = shapePreferences.getString("password","null").toString()
+            okHttpController.login(
+                shapePreferences.getString("username","null").toString(),
+                shapePreferences.getString("password","null").toString(),
+                {
+                    if(it.isSuccess){
+                        callback()
+                    }
+                }
+            )
+        }
+    }
+
     fun login(userName: String, password: String, callback: (Result<String>) -> Unit): Call {
         //登录后再次验证身份，方便获取employeeId
         val call = okHttpController.login(
             userName,
             password,
             {
-                callback
+                callback(it)
                 getOrder()//起身份验证作用
                 getDeliveryOrder()
+                if(it.isSuccess){
+                    shapePreferences.edit().putString("password",password).apply()
+                }
+
             }
         )
 
@@ -94,6 +120,12 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
     }
     fun load(){
         okHttpController.connectWS()
+        var sum = 0.0
+        dataList.value.forEach { or->
+            sum += or.amount*0.1
+        }
+        orderMoney.value = sum
+        orderCount.value = dataList.value.size
     }
 
     fun send(){
@@ -128,6 +160,18 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
             }
         })
 
+    }
+
+    fun getData(){
+        okHttpController.getData({orderList->
+            _dataList.update {orderList}
+            var sum = 0.0
+            dataList.value.forEach { or->
+                sum += or.amount*0.1
+            }
+            orderMoney.value = sum
+            orderCount.value = dataList.value.size
+        })
     }
     fun getDeliveryOrder(){
         val cId = shapePreferences.getLong("cId",0)

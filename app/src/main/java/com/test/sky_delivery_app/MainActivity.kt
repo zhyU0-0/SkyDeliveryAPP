@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.test.sky_delivery_app.request.RetrofitClient
 import com.test.sky_delivery_app.ui.theme.SkyDeliveryAppTheme
 import com.test.sky_delivery_app.viewmodel.HttpViewModel
 import com.test.sky_delivery_app.websocket.OkHttpController
@@ -26,6 +27,9 @@ class MainActivity : ComponentActivity() {
         sharedPreferences = this.getSharedPreferences("AppData", Context.MODE_PRIVATE)
         wsViewModel = HttpViewModel(this,sharedPreferences)
         okHttpController = wsViewModel.okHttpController
+        RetrofitClient.init(
+            sharedPreferences
+        )
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {

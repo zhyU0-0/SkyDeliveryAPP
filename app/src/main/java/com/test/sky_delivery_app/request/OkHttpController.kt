@@ -28,41 +28,6 @@ class OkHttpController(private val context: Context, private val sharedPreferenc
         okHttpWebSocketService.close()
     }
 
-    /*// 登录方法 - 返回 Call 以便可以在需要时取消
-    fun login(userName: String, password: String, callback: (Result<String>) -> Unit): Call {
-        // 构建登录 URL（根据你的 API 设计调整参数）
-        val url = "$baseUrl/login?username=$userName&password=$password"
-        // 或者使用 POST 方式（推荐）
-        // val requestBody = FormBody.Builder()
-        //     .add("username", userName)
-        //     .add("password", password)
-        //     .build()
-
-        val request = Request.Builder()
-            .url(url)
-            .get() // 明确指定 GET 方法
-            .build()
-
-        val call = client.newCall(request)
-
-        call.enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                callback(Result.failure(e))
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                val body = response.body?.string()
-                if (response.isSuccessful && body != null) {
-                    callback(Result.success(body))
-                } else {
-                    callback(Result.failure(IOException("登录失败: ${response.code}")))
-                }
-            }
-        })
-
-        return call
-    }*/
-
     // 通用的 GET 请求方法
     fun asyncGet(url: String, callback: (Result<String>) -> Unit): Call {
         val request = Request.Builder()
@@ -319,6 +284,7 @@ class OkHttpController(private val context: Context, private val sharedPreferenc
         })
 
     }
+
     fun complete(id:Int,callback: (String)-> Unit){
 
         val request = Request.Builder()

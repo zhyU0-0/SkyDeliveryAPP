@@ -62,6 +62,7 @@ fun QRCodeScanner(
                         { imageProxy ->
                             if (isScanningEnabled) {
                                 Log.v("isScanning",isScanningEnabled.toString())
+                                //关键识别函数
                                 processImage(
                                     imageProxy = imageProxy,
                                     barcodeScanner = barcodeScanner,

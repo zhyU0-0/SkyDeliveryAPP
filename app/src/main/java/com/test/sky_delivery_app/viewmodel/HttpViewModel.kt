@@ -5,16 +5,21 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.test.sky_delivery_app.pojo.Employee
 import com.test.sky_delivery_app.pojo.MassageDTO
 import com.test.sky_delivery_app.pojo.Orders
 import com.test.sky_delivery_app.pojo.OrdersPageQueryDTO
 import com.test.sky_delivery_app.pojo.vo.OrderVO
+import com.test.sky_delivery_app.request.Repository
+import com.test.sky_delivery_app.request.RetrofitClient
 import com.test.sky_delivery_app.websocket.OkHttpController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
@@ -28,6 +33,9 @@ import kotlin.collections.forEach
 import kotlin.collections.minus
 import kotlin.collections.plus
 import kotlin.math.log
+import androidx.core.content.edit
+import com.test.sky_delivery_app.pojo.LoginResult
+import com.test.sky_delivery_app.websocket.OkHttpWebSocketService
 
 class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) : ViewModel() {
 
@@ -48,9 +56,8 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
     var orderMoney = mutableStateOf(0.0)
     var orderCount = mutableStateOf(0)
 
-
-    val okHttpController =  OkHttpController(context,shapePreferences,{
-        massageDTO ->
+    val okHttpWebSocketService = OkHttpWebSocketService({
+            massageDTO ->
         if(shapePreferences.getLong("cId",0)==massageDTO.employeeId){
             _messageList.update { currentList ->
                 currentList + massageDTO
@@ -59,6 +66,15 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
         Log.v("The Message", massageDTO.toString())
         Log.v("MessageList",_messageList.toString())
     })
+
+    private val authRepository = Repository(
+        RetrofitClient.authApiService,
+        shapePreferences
+    )
+
+
+
+    //val okHttpController =  OkHttpController(context,shapePreferences,)
 
     fun _getEmployee(): Employee{
         employee = Employee(
@@ -71,37 +87,52 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
 
     fun is_auth(callback: ()-> Unit){
         if(shapePreferences.getString("password","null").toString() != "null"){
-            val p = shapePreferences.getString("password","null").toString()
-            okHttpController.login(
-                shapePreferences.getString("username","null").toString(),
-                shapePreferences.getString("password","null").toString(),
-                {
-                    if(it.isSuccess){
+            viewModelScope.launch {
+
+                val result = authRepository.login(
+                    shapePreferences.getString("username","null").toString(),
+                    shapePreferences.getString("password","null").toString(),
+                )
+                when (result) {
+                    is LoginResult.Error -> {
+                        Log.v("Error","Error")
+                    }
+                    LoginResult.NetworkError -> {
+                        Log.v("NetworkError","NetworkError")
+                    }
+                    is LoginResult.Success -> {
                         callback()
+                        getOrder()//起身份验证作用
+                        getDeliveryOrder()
                     }
                 }
-            )
+            }
+
         }
     }
 
-    fun login(userName: String, password: String, callback: (Result<String>) -> Unit): Call {
+    fun login(userName: String, password: String, callback: () -> Unit) {
         //登录后再次验证身份，方便获取employeeId
-        val call = okHttpController.login(
-            userName,
-            password,
-            {
-                callback(it)
-                getOrder()//起身份验证作用
-                getDeliveryOrder()
-                if(it.isSuccess){
-                    shapePreferences.edit().putString("password",password).apply()
+
+        viewModelScope.launch {
+            val result = authRepository.login(userName, password)
+            when (result) {
+                is LoginResult.Error -> {
+                    Log.v("Error","Error")
                 }
-
+                LoginResult.NetworkError -> {
+                    Log.v("NetworkError","NetworkError")
+                }
+                is LoginResult.Success -> {
+                    shapePreferences.edit {
+                            putString("password", password)
+                        }
+                    callback()
+                    getOrder()//起身份验证作用
+                    getDeliveryOrder()
+                }
             }
-        )
-
-
-        return call
+        }
     }
 
     fun confine(id:Long){
@@ -119,7 +150,9 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
         Log.d("MsgList",_messageList.value.size.toString())
     }
     fun load(){
-        okHttpController.connectWS()
+        val empId = shapePreferences.getLong("cId",0)
+        okHttpWebSocketService.connect("ws://10.0.2.2:8080/ws/${empId}") // WebSocket URL
+
         var sum = 0.0
         dataList.value.forEach { or->
             sum += or.amount*0.1
@@ -129,92 +162,102 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
     }
 
     fun send(){
-        okHttpController.okHttpWebSocketService.sendMessage("")
+        okHttpWebSocketService.sendMessage("")
     }
 
     fun destroy(){
-        okHttpController.close()
+        okHttpWebSocketService.close()
     }
     
     fun getOrder(){
 
         val op = OrdersPageQueryDTO(1,100,null,null,3,null,null,null,null)//3->4:店家接单->派送中
-        okHttpController.getOrders(op, {orderRecords ->
-            val orderVoList = mutableListOf<OrderVO>()
-            orderRecords.forEach { or->
-                orderVoList.add(OrderVO(
-                    id = or.id,
-                    number = or.number,
-                    userId = or.userId,
-                    phone = or.phone,
-                    addressBookId = or.addressBookId,
-                    checkoutTime = or.checkoutTime,
-                    amount = or.amount,
-                    remark = or.remark,
-                    userName = or.userName,
-                    address = or.address
-                ))
+
+        viewModelScope.launch {
+            val result = authRepository.getOrders(op)
+            if(result.isNotEmpty()){
+                val orderVoList = mutableListOf<OrderVO>()
+                result.forEach { or->
+                    orderVoList.add(OrderVO(
+                        id = or.id,
+                        number = or.number,
+                        userId = or.userId,
+                        phone = or.phone,
+                        addressBookId = or.addressBookId,
+                        checkoutTime = or.checkoutTime,
+                        amount = or.amount,
+                        remark = or.remark,
+                        userName = or.userName,
+                        address = or.address
+                    ))
+                }
+                _orderList.update { current->
+                    orderVoList
+                }
             }
-            _orderList.update { current->
-                orderVoList
-            }
-        })
+        }
 
     }
 
     fun getData(){
-        okHttpController.getData({orderList->
-            _dataList.update {orderList}
+        viewModelScope.launch {
+            val result = authRepository.getData()
+            _dataList.update {result}
             var sum = 0.0
             dataList.value.forEach { or->
                 sum += or.amount*0.1
             }
             orderMoney.value = sum
             orderCount.value = dataList.value.size
-        })
+        }
     }
     fun getDeliveryOrder(){
         val cId = shapePreferences.getLong("cId",0)
         val op = OrdersPageQueryDTO(1,100,null,null,4,null,null,null,cId)//4->5:派送->完成
-        okHttpController.getOrders(op, {orderRecords ->
-            val orderVoList = mutableListOf<OrderVO>()
-            orderRecords.forEach { or->
-                orderVoList.add(OrderVO(
-                    id = or.id,
-                    number = or.number,
-                    userId = or.userId,
-                    phone = or.phone,
-                    addressBookId = or.addressBookId,
-                    checkoutTime = or.checkoutTime,
-                    amount = or.amount,
-                    remark = or.remark,
-                    userName = or.userName,
-                    address = or.address
-                ))
+        viewModelScope.launch {
+            val result = authRepository.getOrders(op)
+            if(result.isNotEmpty()){
+                val orderVoList = mutableListOf<OrderVO>()
+                result.forEach { or->
+                    orderVoList.add(OrderVO(
+                        id = or.id,
+                        number = or.number,
+                        userId = or.userId,
+                        phone = or.phone,
+                        addressBookId = or.addressBookId,
+                        checkoutTime = or.checkoutTime,
+                        amount = or.amount,
+                        remark = or.remark,
+                        userName = or.userName,
+                        address = or.address
+                    ))
+                }
+                _deliveryList.update { current->
+                    orderVoList
+                }
             }
-            _deliveryList.update { current->
-                orderVoList
-            }
-        })
+        }
 
     }
 
     fun delivery(id:Int){
-        okHttpController.delivery(id,{str->
-            if(str=="200"){
-                delivery_succeeful.value = true
+
+        viewModelScope.launch {
+            val result = authRepository.delivery(id)
+            if(result!= -1){
+                getOrder()
             }
-            getOrder()
-        })
+        }
+
     }
 
     fun complete(id: Int){
-        okHttpController.complete(id,{str->
-            if(str=="200"){
-                complete_succeeful.value = true
+        viewModelScope.launch {
+            val result = authRepository.complete(id)
+            if(result != -1){
+                getDeliveryOrder()
             }
-            getDeliveryOrder()
-        })
+        }
     }
 
 }

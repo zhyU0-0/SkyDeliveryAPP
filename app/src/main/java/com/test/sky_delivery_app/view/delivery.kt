@@ -34,6 +34,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,16 +49,20 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.test.sky_delivery_app.myKey.YourKey
+import com.test.sky_delivery_app.map.NavigaterActivity
 import com.test.sky_delivery_app.pojo.vo.OrderVO
 import com.test.sky_delivery_app.viewmodel.HttpViewModel
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeliveryScreen(viewModel: HttpViewModel) {
+fun DeliveryScreen(
+    viewModel: HttpViewModel,
+) {
     val deliveryList by viewModel.deliveryList.collectAsStateWithLifecycle()
     val listStatus = rememberLazyListState()
     val context = LocalContext.current
+    var goat by remember { mutableStateOf("国防科技大学") }
 
     Scaffold(
         topBar = {
@@ -103,8 +110,14 @@ fun DeliveryScreen(viewModel: HttpViewModel) {
                 ) {
                     Button(
                         onClick = {
-                            val intent = Intent(context, MapActivity::class.java)
+                            val intent = Intent(
+                                context,
+                                NavigaterActivity::class.java
+                            )
+                            goat = "桂林电子科技大学"
+                            intent.putExtra("GOAT", goat)
                             context.startActivity(intent)
+
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary

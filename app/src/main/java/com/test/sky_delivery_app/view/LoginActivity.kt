@@ -48,20 +48,21 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.test.sky_delivery_app.MainActivity
+import com.test.sky_delivery_app.request.RetrofitClient
 import com.test.sky_delivery_app.view.ui.theme.SkyDeliveryAppTheme
 import com.test.sky_delivery_app.viewmodel.HttpViewModel
-import com.test.sky_delivery_app.websocket.OkHttpController
-import okhttp3.Callback
+
 
 class LoginActivity : ComponentActivity() {
     private lateinit var sharedPreferences: SharedPreferences
-    private lateinit var okHttpController: OkHttpController
     private lateinit var wsViewModel: HttpViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sharedPreferences = this.getSharedPreferences("AppData", Context.MODE_PRIVATE)
+        RetrofitClient.init(
+            sharedPreferences
+        )
         wsViewModel = HttpViewModel(this,sharedPreferences)
-        okHttpController = wsViewModel.okHttpController
         wsViewModel.is_auth(
             {
                 val intent = Intent(this, MainActivity::class.java)
@@ -172,13 +173,14 @@ fun LoginScreen(
         // 登录按钮
         Button(
             onClick = {
+                goto()
                 focusManager.clearFocus()
                 viewModel.login(
                     username,
                     password,
                     {
                         Log.v("goto","goto")
-                        goto()
+                        /*goto()*/
                     }
                 )
             },

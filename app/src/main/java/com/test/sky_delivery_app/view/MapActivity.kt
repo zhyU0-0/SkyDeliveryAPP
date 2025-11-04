@@ -7,9 +7,9 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.amap.api.maps2d.AMap
-import com.amap.api.maps2d.MapView
-import com.amap.api.maps2d.model.MyLocationStyle
+import com.amap.api.maps.AMap
+import com.amap.api.maps.MapView
+import com.amap.api.maps.model.MyLocationStyle
 import com.test.sky_delivery_app.R
 
 class MapActivity : Activity() {

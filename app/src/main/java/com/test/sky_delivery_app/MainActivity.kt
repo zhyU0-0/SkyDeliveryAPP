@@ -16,20 +16,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.test.sky_delivery_app.request.RetrofitClient
 import com.test.sky_delivery_app.ui.theme.SkyDeliveryAppTheme
 import com.test.sky_delivery_app.viewmodel.HttpViewModel
-import com.test.sky_delivery_app.websocket.OkHttpController
 
 class MainActivity : ComponentActivity() {
     private lateinit var sharedPreferences: SharedPreferences
-    private lateinit var okHttpController: OkHttpController
     private lateinit var wsViewModel: HttpViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         sharedPreferences = this.getSharedPreferences("AppData", Context.MODE_PRIVATE)
         wsViewModel = HttpViewModel(this,sharedPreferences)
-        okHttpController = wsViewModel.okHttpController
-        RetrofitClient.init(
-            sharedPreferences
-        )
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {

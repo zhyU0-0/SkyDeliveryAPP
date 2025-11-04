@@ -87,4 +87,5 @@ dependencies {
     implementation("com.amap.api:map2d:latest.integration")
     /*implementation("com.amap.api:search:latest.integration")*/
     implementation("com.amap.api:location:latest.integration")
+    implementation("com.amap.api:navi-3dmap:latest.integration")
 }

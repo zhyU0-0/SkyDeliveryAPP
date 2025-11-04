@@ -1,0 +1,8 @@
+<resources>
+    <string name="mapKey">SkyDeliveryApp</string>
+    <string name="title_activity_main2">MainActivity2</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_map">MapActivity</string>
+    <string name="title_activity_qr">QRActivity</string>
+</resources>

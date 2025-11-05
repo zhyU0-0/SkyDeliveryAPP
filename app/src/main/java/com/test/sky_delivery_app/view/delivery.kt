@@ -49,15 +49,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.test.sky_delivery_app.map.NavigaterActivity
 import com.test.sky_delivery_app.pojo.vo.OrderVO
 import com.test.sky_delivery_app.viewmodel.HttpViewModel
+import com.test.sky_delivery_app.viewmodel.MapViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeliveryScreen(
     viewModel: HttpViewModel,
+    mapViewModel: MapViewModel
 ) {
     val deliveryList by viewModel.deliveryList.collectAsStateWithLifecycle()
     val listStatus = rememberLazyListState()
@@ -110,14 +111,15 @@ fun DeliveryScreen(
                 ) {
                     Button(
                         onClick = {
-                            val intent = Intent(
+                            /*val intent = Intent(
                                 context,
                                 NavigaterActivity::class.java
-                            )
-                            goat = "桂林电子科技大学"
-                            intent.putExtra("GOAT", goat)
+                            )*/
+                            mapViewModel.goat.value = "桂林电子科技大学"
+                            mapViewModel.search()
+                            /*intent.putExtra("GOAT", goat)
                             context.startActivity(intent)
-
+*/
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary

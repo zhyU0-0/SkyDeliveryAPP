@@ -46,19 +46,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.test.sky_delivery_app.pojo.vo.OrderVO
 import com.test.sky_delivery_app.view.DeliveryScreen
-import com.test.sky_delivery_app.view.MapActivity
 import com.test.sky_delivery_app.view.OrderScreen
 import com.test.sky_delivery_app.view.UserScreen
 import com.test.sky_delivery_app.viewmodel.HttpViewModel
+import com.test.sky_delivery_app.viewmodel.MapViewModel
 import kotlin.toString
 
 
 @Composable
 fun MainScreen(
     viewModel: HttpViewModel,
-
+    mapViewModel: MapViewModel
 ) {
     val messageList by viewModel.messageList.collectAsStateWithLifecycle()
     val navController = rememberNavController()
@@ -78,7 +77,7 @@ fun MainScreen(
                 modifier = Modifier.padding(innerPadding)
             ) {
                 composable("orders") { OrderScreen(viewModel) }
-                composable("delivery") { DeliveryScreen(viewModel) }
+                composable("delivery") { DeliveryScreen(viewModel,mapViewModel) }
                 composable("user") { UserScreen(viewModel) }
             }
         }

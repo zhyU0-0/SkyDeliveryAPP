@@ -36,17 +36,15 @@
         <meta-data
             android:name="com.amap.api.v2.apikey"
             android:value="@string/mapKey" />
+
+        <!--导航Activity-->
         <activity
             android:name="com.amap.api.navi.AmapRouteActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="false"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <service android:name="com.amap.api.location.APSService" />
-        <activity
-            android:name=".map.NavigaterActivity"
-            android:exported="true" >
 
-        </activity>
         <activity
             android:name=".MainActivity"
             android:exported="false"
@@ -56,11 +54,6 @@
             android:name=".view.QRActivity"
             android:exported="false"
             android:label="@string/title_activity_qr"
-            android:theme="@style/Theme.SkyDeliveryApp" />
-        <activity
-            android:name=".view.MapActivity"
-            android:exported="false"
-            android:label="@string/title_activity_map"
             android:theme="@style/Theme.SkyDeliveryApp" />
         <activity
             android:name=".view.LoginActivity"

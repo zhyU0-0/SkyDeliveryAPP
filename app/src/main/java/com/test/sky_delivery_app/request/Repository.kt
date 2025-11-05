@@ -3,14 +3,14 @@ package com.test.sky_delivery_app.request
 import android.content.SharedPreferences
 import android.util.Log
 import com.google.gson.Gson
-import com.test.sky_delivery_app.pojo.LoginData
-import com.test.sky_delivery_app.pojo.LoginRequest
-import com.test.sky_delivery_app.pojo.LoginResult
+import com.test.sky_delivery_app.pojo.response.LoginData
+import com.test.sky_delivery_app.pojo.response.LoginRequest
+import com.test.sky_delivery_app.pojo.response.LoginResult
 import com.test.sky_delivery_app.pojo.OrderRecord
 import com.test.sky_delivery_app.pojo.OrderResponse
 import com.test.sky_delivery_app.pojo.Orders
 import com.test.sky_delivery_app.pojo.OrdersPageQueryDTO
-import org.json.JSONException
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 
@@ -61,23 +61,9 @@ class Repository(
                 employeeId = op.employeeId
             )
 
-            if (response.isSuccessful) {
-                val body = response.body.toString()
-                if (body.isNotEmpty()) {
-                    val responseJson = JSONObject(body)
-
-                    val jsonObject = JSONObject(responseJson.toString())
-                    val code = jsonObject.getInt("code")
-                    val msg = jsonObject.optString("msg")
-
-                    val dataObject = jsonObject.getJSONObject("data")
-                    Log.v("OrderVOPage",dataObject.toString())
-                    val orderResponse = gson.fromJson(dataObject.toString(), OrderResponse::class.java)
-
-                    orderResponse.records
-                } else {
-                    emptyList()
-                }
+            if (response.code == 1) {
+                val orderResponse = response.data
+                orderResponse.records
             } else {
                 emptyList()
             }
@@ -90,7 +76,7 @@ class Repository(
     suspend fun delivery(id:Int):Int{
         return try{
             val response = apiService.delivery(id)
-            if(response.isSuccessful){ 1 }else{ -1 }
+            if(response.code == 1){ 1 }else{ -1 }
         }catch (e: Exception){
             Log.e("delivery",e.toString())
             -1
@@ -100,7 +86,7 @@ class Repository(
     suspend fun complete(id:Int):Int{
         return try{
             val response = apiService.complete(id)
-            if(response.isSuccessful){ 1 }else{ -1 }
+            if(response.code == 1){ 1 }else{ -1 }
         }catch (e: Exception){
             Log.e("complete",e.toString())
             -1
@@ -110,21 +96,8 @@ class Repository(
     suspend fun getData():List<Orders>{
         return try {
             val response = apiService.getData()
-            if(response.isSuccessful){
-                val jsonData = JSONObject(response.body.toString())
-                val data = jsonData.getJSONArray("data")
-                val orderList = mutableListOf<Orders>()
-                if(data.length() > 0){
-                    var index = 0
-                    while (index < data.length()){
-                        Log.v("Orders",data.getJSONObject(index).toString())
-                        val orderJson = data.getJSONObject(index).toString()
-                        val od = gson.fromJson(orderJson, Orders::class.java)
-                        orderList.add(od)
-                        index++
-                    }
-                }
-                orderList
+            if(response.code==1){
+                response.data
             }else{
                 listOf()
             }

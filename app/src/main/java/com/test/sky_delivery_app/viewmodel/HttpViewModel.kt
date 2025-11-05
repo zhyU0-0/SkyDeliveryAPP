@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.test.sky_delivery_app.pojo.Employee
 import com.test.sky_delivery_app.pojo.MassageDTO
 import com.test.sky_delivery_app.pojo.Orders
@@ -19,21 +18,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.Request
-import okhttp3.RequestBody
-import okhttp3.Response
-import org.json.JSONObject
-import java.io.IOException
 import kotlin.collections.find
 import kotlin.collections.forEach
 import kotlin.collections.minus
 import kotlin.collections.plus
-import kotlin.math.log
 import androidx.core.content.edit
-import com.test.sky_delivery_app.pojo.LoginResult
+import com.test.sky_delivery_app.pojo.response.LoginResult
 import com.test.sky_delivery_app.websocket.OkHttpWebSocketService
 
 class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) : ViewModel() {
@@ -59,7 +49,7 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
             massageDTO ->
         if(shapePreferences.getLong("cId",0)==massageDTO.employeeId){
             _messageList.update { currentList ->
-                currentList + massageDTO
+                listOf(massageDTO) + currentList
             }
         }
         Log.v("The Message", massageDTO.toString())
@@ -174,25 +164,23 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
 
         viewModelScope.launch {
             val result = authRepository.getOrders(op)
-            if(result.isNotEmpty()){
-                val orderVoList = mutableListOf<OrderVO>()
-                result.forEach { or->
-                    orderVoList.add(OrderVO(
-                        id = or.id,
-                        number = or.number,
-                        userId = or.userId,
-                        phone = or.phone,
-                        addressBookId = or.addressBookId,
-                        checkoutTime = or.checkoutTime,
-                        amount = or.amount,
-                        remark = or.remark,
-                        userName = or.userName,
-                        address = or.address
-                    ))
-                }
-                _orderList.update { current->
-                    orderVoList
-                }
+            val orderVoList = mutableListOf<OrderVO>()
+            result.forEach { or->
+                orderVoList.add(OrderVO(
+                    id = or.id,
+                    number = or.number,
+                    userId = or.userId,
+                    phone = or.phone,
+                    addressBookId = or.addressBookId,
+                    checkoutTime = or.checkoutTime,
+                    amount = or.amount,
+                    remark = or.remark,
+                    userName = or.userName,
+                    address = or.address
+                ))
+            }
+            _orderList.update { current->
+                orderVoList
             }
         }
 
@@ -215,25 +203,23 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
         val op = OrdersPageQueryDTO(1,100,null,null,4,null,null,null,cId)//4->5:派送->完成
         viewModelScope.launch {
             val result = authRepository.getOrders(op)
-            if(result.isNotEmpty()){
-                val orderVoList = mutableListOf<OrderVO>()
-                result.forEach { or->
-                    orderVoList.add(OrderVO(
-                        id = or.id,
-                        number = or.number,
-                        userId = or.userId,
-                        phone = or.phone,
-                        addressBookId = or.addressBookId,
-                        checkoutTime = or.checkoutTime,
-                        amount = or.amount,
-                        remark = or.remark,
-                        userName = or.userName,
-                        address = or.address
-                    ))
-                }
-                _deliveryList.update { current->
-                    orderVoList
-                }
+            val orderVoList = mutableListOf<OrderVO>()
+            result.forEach { or->
+                orderVoList.add(OrderVO(
+                    id = or.id,
+                    number = or.number,
+                    userId = or.userId,
+                    phone = or.phone,
+                    addressBookId = or.addressBookId,
+                    checkoutTime = or.checkoutTime,
+                    amount = or.amount,
+                    remark = or.remark,
+                    userName = or.userName,
+                    address = or.address
+                ))
+            }
+            _deliveryList.update { current->
+                orderVoList
             }
         }
 

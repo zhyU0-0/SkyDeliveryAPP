@@ -1,4 +1,4 @@
-package com.test.sky_delivery_app.pojo
+package com.test.sky_delivery_app.pojo.response
 
 // 登录请求体
 data class LoginRequest(

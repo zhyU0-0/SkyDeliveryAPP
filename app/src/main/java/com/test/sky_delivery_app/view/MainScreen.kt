@@ -3,13 +3,18 @@ package com.test.sky_delivery_app
 import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -25,9 +30,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -36,10 +45,13 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.TextField
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -62,6 +74,8 @@ fun MainScreen(
     val messageList by viewModel.messageList.collectAsStateWithLifecycle()
     val navController = rememberNavController()
     var showExitDialog by remember { mutableStateOf(false) }
+    val overlapOffset = 20 //叠加偏移量
+
     BackHandler {
         showExitDialog = true
     }
@@ -81,32 +95,155 @@ fun MainScreen(
                 composable("user") { UserScreen(viewModel) }
             }
         }
-        messageList.forEach {mag->
-            Card (
-                modifier = Modifier
-                    .width(200.dp)
-                    .height(300.dp),
-                elevation = CardDefaults.cardElevation(4.dp)
-            ){
-                Column {
-                    Text(text = mag.orderId.toString()+"催单", fontSize = 30.sp)
-                    Box(modifier = Modifier.height(30.dp))
-                    Row (
-                        verticalAlignment = Alignment.CenterVertically
-                    ){
-                        Button(
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ){
+            messageList.forEachIndexed { index, mag ->
+                val offset = index * overlapOffset
+
+                Card(
+                    modifier = Modifier
+                        .width(280.dp)
+                        .height(220.dp)
+                        .offset(x = offset.dp, y = offset.dp)
+                        .zIndex((messageList.size - index).toFloat()) // 确保前面的卡片在上面
+                        .clickable { viewModel.confine(mag.orderId) },
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = 8.dp + (index * 2).dp // 越靠前的卡片阴影越深
+                    ),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White.copy(alpha = 0.95f - (index * 0.1f)) // 叠加透明度变化
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color(0xFF667eea).copy(alpha = 0.1f),
+                                        Color(0xFF764ba2).copy(alpha = 0.05f)
+                                    )
+                                )
+                            )
+                    ) {
+                        Column(
                             modifier = Modifier
-                                .background(Color.Green),
-                            onClick = {
-                                viewModel.confine(mag.orderId)
-                            }
+                                .fillMaxSize()
+                                .padding(16.dp)
                         ) {
-                            Text("确定")
+                            // 标题区域
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "催单提醒",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF764ba2)
+                                )
+
+                                // 催单计数标签
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            color = Color(0xFFFF6B6B),
+                                            shape = RoundedCornerShape(12.dp)
+                                        )
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                ) {
+                                    Text(
+                                        text = "${index + 1}/${messageList.size}",
+                                        fontSize = 12.sp,
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // 订单信息
+                            Text(
+                                text = "订单号: ${mag.orderId}",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF2D3748)
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = "客户正在等待，请尽快处理！",
+                                fontSize = 14.sp,
+                                color = Color(0xFF718096),
+                                lineHeight = 18.sp
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // 时间戳（如果有的话）
+                            Text(
+                                text = "刚刚",
+                                fontSize = 12.sp,
+                                color = Color(0xFFA0AEC0)
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // 操作按钮
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                Button(
+                                    onClick = { viewModel.confine(mag.orderId) },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFF48BB78)
+                                    ),
+                                    shape = RoundedCornerShape(12.dp),
+                                    elevation = ButtonDefaults.buttonElevation(
+                                        defaultElevation = 4.dp,
+                                        pressedElevation = 2.dp
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = "确认",
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "确认处理",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+                        }
+
+                        // 紧急标识
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = "紧急",
+                                tint = Color(0xFFFF6B6B),
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
                     }
                 }
             }
         }
+
     }
 
 }

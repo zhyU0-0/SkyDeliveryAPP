@@ -1,7 +1,10 @@
 package com.test.sky_delivery_app.request
 
-import com.test.sky_delivery_app.pojo.LoginRequest
-import com.test.sky_delivery_app.pojo.LoginResponse
+import com.test.sky_delivery_app.pojo.response.BaseResponse
+import com.test.sky_delivery_app.pojo.response.GetDataResponse
+import com.test.sky_delivery_app.pojo.response.GetOrdersResponse
+import com.test.sky_delivery_app.pojo.response.LoginRequest
+import com.test.sky_delivery_app.pojo.response.LoginResponse
 import okhttp3.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -58,16 +61,16 @@ interface ApiService {
         @Query("pageSize") pageSize: Int,
         @Query("status") status: Int?,
         @Query("employeeId") employeeId: Long?
-    ): Response
+    ): GetOrdersResponse
 
     @PUT("deliver/order/delivery/{id}")
-    suspend fun delivery(@Path("id") id:Int):Response
+    suspend fun delivery(@Path("id") id:Int): BaseResponse
 
     @PUT("deliver/order/complete/{id}")
-    suspend fun complete(@Path("id") id:Int):Response
+    suspend fun complete(@Path("id") id:Int): BaseResponse
 
     @GET("deliver/report/data")
-    suspend fun getData(): Response
+    suspend fun getData(): GetDataResponse
 
 
 }

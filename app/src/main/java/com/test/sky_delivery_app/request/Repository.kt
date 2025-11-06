@@ -10,6 +10,7 @@ import com.test.sky_delivery_app.pojo.OrderRecord
 import com.test.sky_delivery_app.pojo.OrderResponse
 import com.test.sky_delivery_app.pojo.Orders
 import com.test.sky_delivery_app.pojo.OrdersPageQueryDTO
+import com.test.sky_delivery_app.pojo.vo.DetailOrderVO
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
@@ -104,6 +105,23 @@ class Repository(
         }catch (e: Exception){
             Log.e("getData",e.toString())
             listOf()
+        }
+    }
+
+    suspend fun getOrderById(id:Int):DetailOrderVO{
+        return try {
+            val response = apiService.getDetail(id)
+            if(response.code==1){
+                Log.e("getData",response.data.toString())
+
+                response.data
+
+            }else{
+                DetailOrderVO(Orders(),listOf())
+            }
+        }catch (e: Exception){
+            Log.e("getData",e.toString())
+            DetailOrderVO(Orders(),listOf())
         }
     }
 

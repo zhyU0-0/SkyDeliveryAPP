@@ -1,6 +1,5 @@
 package com.test.sky_delivery_app
 
-import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,8 +15,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -27,9 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -40,10 +35,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.TextField
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -63,7 +56,6 @@ import com.test.sky_delivery_app.view.OrderScreen
 import com.test.sky_delivery_app.view.UserScreen
 import com.test.sky_delivery_app.viewmodel.HttpViewModel
 import com.test.sky_delivery_app.viewmodel.MapViewModel
-import kotlin.toString
 
 
 @Composable
@@ -82,7 +74,7 @@ fun MainScreen(
     Box{
         Scaffold(
             bottomBar = {
-                BottomNavigationBar(navController = navController)
+                BottomNavigationBar(navController = navController,viewModel)
             }
         ) { innerPadding ->
             NavHost(
@@ -249,7 +241,7 @@ fun MainScreen(
 }
 
 @Composable
-fun BottomNavigationBar(navController: NavHostController) {
+fun BottomNavigationBar(navController: NavHostController,viewModel: HttpViewModel) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -288,6 +280,9 @@ fun BottomNavigationBar(navController: NavHostController) {
                         // 恢复状态
                         restoreState = true
                     }
+                    if(item.title == "订单"){viewModel.getOrder()}
+                    if(item.title == "派送"){viewModel.getDeliveryOrder()}
+                    if(item.title == "我的"){viewModel.getData()}
                 },
                 icon = {
                     Icon(

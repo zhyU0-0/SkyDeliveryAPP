@@ -5,4 +5,5 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_map">MapActivity</string>
     <string name="title_activity_qr">QRActivity</string>
+    <string name="title_activity_detail">detail_activity</string>
 </resources>

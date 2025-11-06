@@ -2,6 +2,7 @@ package com.test.sky_delivery_app.request
 
 import com.test.sky_delivery_app.pojo.response.BaseResponse
 import com.test.sky_delivery_app.pojo.response.GetDataResponse
+import com.test.sky_delivery_app.pojo.response.GetOrdersByIdResponse
 import com.test.sky_delivery_app.pojo.response.GetOrdersResponse
 import com.test.sky_delivery_app.pojo.response.LoginRequest
 import com.test.sky_delivery_app.pojo.response.LoginResponse
@@ -71,6 +72,9 @@ interface ApiService {
 
     @GET("deliver/report/data")
     suspend fun getData(): GetDataResponse
+
+    @GET("deliver/order/detail/{id}")
+    suspend fun getDetail(@Path("id") id:Int): GetOrdersByIdResponse
 
 
 }

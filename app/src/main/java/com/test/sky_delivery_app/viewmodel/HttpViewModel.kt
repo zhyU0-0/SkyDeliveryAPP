@@ -24,6 +24,7 @@ import kotlin.collections.minus
 import kotlin.collections.plus
 import androidx.core.content.edit
 import com.test.sky_delivery_app.pojo.response.LoginResult
+import com.test.sky_delivery_app.pojo.vo.DetailOrderVO
 import com.test.sky_delivery_app.websocket.OkHttpWebSocketService
 
 class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) : ViewModel() {
@@ -44,6 +45,7 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
     lateinit var employee: Employee
     var orderMoney = mutableStateOf(0.0)
     var orderCount = mutableStateOf(0)
+    var detail = mutableStateOf(DetailOrderVO(Orders(),listOf()))
 
     val okHttpWebSocketService = OkHttpWebSocketService({
             massageDTO ->
@@ -242,6 +244,13 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
             if(result != -1){
                 getDeliveryOrder()
             }
+        }
+    }
+
+    fun getOrderById(id: Int){
+        viewModelScope.launch {
+            val result = authRepository.getOrderById(id)
+            detail.value = result
         }
     }
 

@@ -1,6 +1,7 @@
 package com.test.sky_delivery_app.view
 
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -265,6 +266,7 @@ fun OrderScreen(viewModel: HttpViewModel) {
 
 @Composable
 fun OrderItem(order: OrderVO, wsViewModel: HttpViewModel) {
+    val context = LocalContext.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -277,7 +279,13 @@ fun OrderItem(order: OrderVO, wsViewModel: HttpViewModel) {
             containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(4.dp),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
+        onClick = {
+            val intent = Intent(context, DetailActivity::class.java)
+            intent.putExtra("OrderId",order.id.toInt())
+            Log.v("OrderId",order.id.toString())
+            context.startActivity(intent)
+        }
     ) {
         Row(
             modifier = Modifier

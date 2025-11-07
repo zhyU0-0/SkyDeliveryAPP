@@ -316,11 +316,11 @@ fun DeliveryItem(order: OrderVO, wsViewModel: HttpViewModel) {
                 ),
                 modifier = Modifier
                     .height(48.dp)
-                    .width(100.dp)
+                    .width(110.dp)
             ) {
                 Text(
                     text = "完成配送",
-                    fontSize = 12.sp,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.Bold
                 )
             }

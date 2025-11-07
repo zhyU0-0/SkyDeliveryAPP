@@ -3,6 +3,7 @@
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">127.0.0.1</domain>
         <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">10.33.57.1</domain>
         <domain includeSubdomains="true">10.0.2.2</domain> <!-- 模拟器本地地址 -->
         <domain includeSubdomains="true">your-local-ip</domain> <!-- 你的本地网络IP -->
     </domain-config>

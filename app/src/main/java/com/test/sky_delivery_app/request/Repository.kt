@@ -10,6 +10,7 @@ import com.test.sky_delivery_app.pojo.OrderRecord
 import com.test.sky_delivery_app.pojo.OrderResponse
 import com.test.sky_delivery_app.pojo.Orders
 import com.test.sky_delivery_app.pojo.OrdersPageQueryDTO
+import com.test.sky_delivery_app.pojo.response.AddressBook
 import com.test.sky_delivery_app.pojo.vo.DetailOrderVO
 import org.json.JSONArray
 import org.json.JSONObject
@@ -122,6 +123,19 @@ class Repository(
         }catch (e: Exception){
             Log.e("getData",e.toString())
             DetailOrderVO(Orders(),listOf())
+        }
+    }
+
+    suspend fun getAddress(id:Int): AddressBook{
+        return try{
+            val response = apiService.getAddress(id)
+            if(response.code == 1){
+                response.data
+            }
+            AddressBook()
+        }catch (e: Exception){
+            Log.e("getAddress",e.toString())
+            AddressBook()
         }
     }
 

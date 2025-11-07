@@ -37,28 +37,49 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.amap.api.maps.MapsInitializer
 import com.test.sky_delivery_app.pojo.OrderDetail
 import com.test.sky_delivery_app.pojo.Orders
 import com.test.sky_delivery_app.view.ui.theme.SkyDeliveryAppTheme
 import com.test.sky_delivery_app.viewmodel.HttpViewModel
+import com.test.sky_delivery_app.viewmodel.MapViewModel
 
 class DetailActivity : ComponentActivity() {
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var wsViewModel: HttpViewModel
+    private lateinit var mapViewModel: MapViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         sharedPreferences = this.getSharedPreferences("AppData", Context.MODE_PRIVATE)
         wsViewModel = HttpViewModel(this,sharedPreferences)
+        mapViewModel = MapViewModel(this)
         val orderId = intent.getIntExtra("OrderId",-1)
         Log.v("OrderId",orderId.toString())
 
         wsViewModel.getOrderById(orderId.toString().toInt())
-
+        loadMap()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             SkyDeliveryAppTheme {
-                DetailScreen({finish()},wsViewModel)
+                DetailScreen({finish()},wsViewModel,mapViewModel)
             }
+        }
+    }
+
+    fun loadMap(){
+        try {
+            // 设置是否在 stop 的时候杀死地图进程
+            MapsInitializer.updatePrivacyShow(this, true, true)
+            MapsInitializer.updatePrivacyAgree(this, true)
+
+            /*// 初始化导航（重要）
+            com.amap.api.navi.AMapNavi.setAppOffline(this, 9) // 9代表离线数据版本
+            com.amap.api.navi.AMapNavi.updatePrivacyShow(this, true, true)
+            com.amap.api.navi.AMapNavi.updatePrivacyAgree(this, true)*/
+
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }
@@ -66,7 +87,8 @@ class DetailActivity : ComponentActivity() {
 @Composable
 fun DetailScreen(
     onBackClick:()->Unit,
-    viewModel: HttpViewModel
+    viewModel: HttpViewModel,
+    mapViewModel: MapViewModel
 ){
 
     val detail by remember { viewModel.detail }
@@ -96,7 +118,7 @@ fun DetailScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             // 2. 配送信息卡片
-            DeliveryInfoCard(order)
+            DeliveryInfoCard(order,mapViewModel)
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -143,7 +165,7 @@ private fun OrderBasicInfoCard(order: Orders) {
 }
 
 @Composable
-private fun DeliveryInfoCard(order: Orders) {
+private fun DeliveryInfoCard(order: Orders,mapViewModel: MapViewModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -161,7 +183,13 @@ private fun DeliveryInfoCard(order: Orders) {
 
             InfoRow("收货人", order.consignee)
             InfoRow("联系电话", order.phone)
-            InfoRow("配送地址", order.address)
+            Card (onClick = {
+                mapViewModel.goat.value = order.address.toString()
+                mapViewModel.search()
+            }){
+                InfoRow("配送地址", order.address)
+            }
+
             InfoRow("预计送达", order.estimatedDeliveryTime)
 
             order.deliveryTime?.let { deliveryTime ->

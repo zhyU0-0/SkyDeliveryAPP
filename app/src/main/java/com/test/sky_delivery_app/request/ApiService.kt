@@ -1,5 +1,6 @@
 package com.test.sky_delivery_app.request
 
+import com.test.sky_delivery_app.pojo.response.AddressResponse
 import com.test.sky_delivery_app.pojo.response.BaseResponse
 import com.test.sky_delivery_app.pojo.response.GetDataResponse
 import com.test.sky_delivery_app.pojo.response.GetOrdersByIdResponse
@@ -76,5 +77,6 @@ interface ApiService {
     @GET("deliver/order/detail/{id}")
     suspend fun getDetail(@Path("id") id:Int): GetOrdersByIdResponse
 
-
+    @GET("/deliver/addressBook/{id}")
+    suspend fun getAddress(@Path("id") id:Int): AddressResponse
 }

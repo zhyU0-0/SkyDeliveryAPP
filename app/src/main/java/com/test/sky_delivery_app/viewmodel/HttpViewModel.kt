@@ -34,14 +34,17 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
     private val _orderList = MutableStateFlow<List<OrderVO>>(emptyList())
     private val _deliveryList = MutableStateFlow<List<OrderVO>>(emptyList())
     private val _dataList = MutableStateFlow<List<Orders>>(emptyList())
+    private val _completeList = MutableStateFlow<List<OrderVO>>(emptyList())
     // 公开的不可变状态
     val messageList: StateFlow<List<MassageDTO>> = _messageList.asStateFlow()
     val orderList: StateFlow<List<OrderVO>> = _orderList.asStateFlow()
     val deliveryList: StateFlow<List<OrderVO>> = _deliveryList.asStateFlow()
     val dataList: StateFlow<List<Orders>> = _dataList.asStateFlow()
+    val complete: StateFlow<List<OrderVO>> = _completeList.asStateFlow()
 
     val delivery_succeeful = mutableStateOf(false)
     val complete_succeeful = mutableStateOf(false)
+    var is_show_cpList = mutableStateOf(false)
     lateinit var employee: Employee
     var orderMoney = mutableStateOf(0.0)
     var orderCount = mutableStateOf(0)
@@ -142,7 +145,8 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
     }
     fun load(){
         val empId = shapePreferences.getLong("cId",0)
-        okHttpWebSocketService.connect("ws://10.0.2.2:8080/ws/${empId}") // WebSocket URL
+        val url = "ws://" + shapePreferences.getString("ip", "10.0.2.2:8088") + "/"
+        okHttpWebSocketService.connect(url+"ws/${empId}") // WebSocket URL
 
         var sum = 0.0
         dataList.value.forEach { or->
@@ -250,9 +254,43 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
     fun getOrderById(id: Int){
         viewModelScope.launch {
             val result = authRepository.getOrderById(id)
+            /*if(result.orderDishes.addressBookId != null){
+                result.orderDishes.address = authRepository.getAddress(
+                    result.orderDishes.addressBookId!!.toInt()
+                ).districtName
+            }*/
             detail.value = result
         }
     }
 
+    fun unLogin(){
+        shapePreferences.edit { putString("password", "") }
+    }
+
+    fun getCompleteOrder(){
+        val cId = shapePreferences.getLong("cId",0)
+        val op = OrdersPageQueryDTO(1,100,null,null,5,null,null,null,cId)//4->5:派送->完成
+        viewModelScope.launch {
+            val result = authRepository.getOrders(op)
+            val orderVoList = mutableListOf<OrderVO>()
+            result.forEach { or->
+                orderVoList.add(OrderVO(
+                    id = or.id,
+                    number = or.number,
+                    userId = or.userId,
+                    phone = or.phone,
+                    addressBookId = or.addressBookId,
+                    checkoutTime = or.checkoutTime,
+                    amount = or.amount,
+                    remark = or.remark,
+                    userName = or.userName,
+                    address = or.address
+                ))
+            }
+            _completeList.update { current->
+                orderVoList
+            }
+        }
+    }
 }
 

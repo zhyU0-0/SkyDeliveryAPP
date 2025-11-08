@@ -79,7 +79,7 @@ fun UserScreen(viewModel: HttpViewModel) {
     var ip by remember { mutableStateOf("10.0.2.2:8080") }
 
     // 使用 collectAsStateWithLifecycle 来观察状态变化
-    giu
+    //cc
     val showCompleteList by remember { viewModel.is_show_cpList }
 
     Box(modifier = Modifier.fillMaxSize()) {

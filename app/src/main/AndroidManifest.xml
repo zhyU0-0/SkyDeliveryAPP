@@ -57,6 +57,7 @@
         <activity
             android:name=".view.QRActivity"
             android:exported="false"
+            android:launchMode="singleTask"
             android:label="@string/title_activity_qr"
             android:theme="@style/Theme.SkyDeliveryApp" />
         <activity

@@ -590,7 +590,7 @@ fun UserScreen(viewModel: HttpViewModel,mapViewModel: MapViewModel) {
                         horizontalArrangement = Arrangement.Center
                     ){
                         SelectButton(
-                            R.drawable.ic_launcher_foreground,
+                            R.drawable.car,
                             "汽车",
                             mapViewModel.car.value,
                             0,
@@ -601,7 +601,7 @@ fun UserScreen(viewModel: HttpViewModel,mapViewModel: MapViewModel) {
                         )
                         Box(modifier = Modifier.width(10.dp))
                         SelectButton(
-                            R.drawable.ic_launcher_foreground,
+                            R.drawable.moto,
                             "摩托车",
                             mapViewModel.car.value,
                             1,
@@ -611,13 +611,13 @@ fun UserScreen(viewModel: HttpViewModel,mapViewModel: MapViewModel) {
                             }
                         )
                     }
-                    Box(modifier = Modifier.width(20.dp))
+                    Box(modifier = Modifier.height(10.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ){
                         SelectButton(
-                            R.drawable.ic_launcher_foreground,
+                            R.drawable.cycle,
                             "自行车",
                             mapViewModel.car.value,
                             2,
@@ -628,7 +628,7 @@ fun UserScreen(viewModel: HttpViewModel,mapViewModel: MapViewModel) {
                         )
                         Box(modifier = Modifier.width(10.dp))
                         SelectButton(
-                            R.drawable.ic_launcher_foreground,
+                            R.drawable.walk,
                             "走路",
                             mapViewModel.car.value,
                             3,
@@ -652,8 +652,8 @@ fun SelectButton(
     goatCar:Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
-        .width(160.dp)
-        .height(200.dp),
+        .width(150.dp)
+        .height(180.dp),
     imageUrl: String? = null, // 可选：支持网络图片
     imageSize: Int = 56, // 图片大小
     cornerRadius: Int = 16, // 圆角半径

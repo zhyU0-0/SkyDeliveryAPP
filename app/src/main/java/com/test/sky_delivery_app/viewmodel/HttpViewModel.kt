@@ -25,6 +25,7 @@ import kotlin.collections.minus
 import kotlin.collections.plus
 import androidx.core.content.edit
 import com.test.sky_delivery_app.pojo.response.LoginResult
+import com.test.sky_delivery_app.pojo.response.WeatherResponse
 import com.test.sky_delivery_app.pojo.vo.DetailOrderVO
 import com.test.sky_delivery_app.websocket.OkHttpWebSocketService
 
@@ -50,6 +51,8 @@ class HttpViewModel(val context: Context, val shapePreferences: SharedPreference
     var orderMoney = mutableStateOf(0.0)
     var orderCount = mutableStateOf(0)
     var detail = mutableStateOf(DetailOrderVO(Orders(),listOf()))
+    var weather = mutableStateOf(WeatherResponse())
+
 
     val okHttpWebSocketService = OkHttpWebSocketService({
             massageDTO ->
@@ -63,9 +66,12 @@ class HttpViewModel(val context: Context, val shapePreferences: SharedPreference
     })
 
     private val authRepository = Repository(
+        context,
         RetrofitClient.authApiService,
+        RetrofitClient.weatherService,
         shapePreferences
     )
+
 
 
 
@@ -297,6 +303,17 @@ class HttpViewModel(val context: Context, val shapePreferences: SharedPreference
             }
             _completeList.update { current->
                 orderVoList
+            }
+        }
+    }
+
+    fun getWeather(){
+        viewModelScope.launch {
+            val data = authRepository.getWeather()
+            if(data.status == 1){
+                weather.value = data
+            }else{
+                Toast.makeText(context, "获取天气失败", Toast.LENGTH_SHORT).show()
             }
         }
     }

@@ -51,6 +51,12 @@ object RetrofitClient {
         retrofit.create(ApiService::class.java)
     }
 
+    private val retrofit_weather: Retrofit = Retrofit.Builder()
+        .baseUrl("https://restapi.amap.com/v3/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    val weatherService: WeatherService = retrofit_weather.create(WeatherService::class.java)
     // 提供重新创建实例的方法（当 IP 或重要配置改变时）
     fun reset() {
         // 由于使用了 lazy，重新访问时会重新创建

@@ -1,8 +1,10 @@
 package com.test.sky_delivery_app.request
 
+import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import com.google.gson.Gson
+import com.test.sky_delivery_app.R
 import com.test.sky_delivery_app.pojo.response.LoginData
 import com.test.sky_delivery_app.pojo.response.LoginRequest
 import com.test.sky_delivery_app.pojo.response.LoginResult
@@ -11,13 +13,16 @@ import com.test.sky_delivery_app.pojo.OrderResponse
 import com.test.sky_delivery_app.pojo.Orders
 import com.test.sky_delivery_app.pojo.OrdersPageQueryDTO
 import com.test.sky_delivery_app.pojo.response.AddressBook
+import com.test.sky_delivery_app.pojo.response.WeatherResponse
 import com.test.sky_delivery_app.pojo.vo.DetailOrderVO
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 
 class Repository(
+    private val context: Context,
     private val apiService: ApiService,
+    private val weatherService: WeatherService,
     private val sharedPreferences: SharedPreferences
 ) {
     val gson = Gson()
@@ -136,6 +141,22 @@ class Repository(
         }catch (e: Exception){
             Log.e("getAddress",e.toString())
             AddressBook()
+        }
+    }
+
+    suspend fun getWeather(): WeatherResponse{
+        val key = context.getString(R.string.weather)
+        return try{
+            val response = weatherService.getWeather(key,"110101","base","JSON")
+            if(response.status == 1){
+                Log.v("getWeather",response.toString())
+                response
+            }else{
+                WeatherResponse()
+            }
+        }catch (e: Exception){
+            Log.e("getWeather",e.toString())
+            WeatherResponse()
         }
     }
 

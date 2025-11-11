@@ -185,11 +185,12 @@ fun UserScreen(viewModel: HttpViewModel,mapViewModel: MapViewModel) {
                                 icon = Icons.Default.Refresh,
                                 modifier = Modifier.fillMaxSize(),
                                 onClick = {
-                                    viewModel.unLogin()
+                                    /*viewModel.unLogin()
                                     val intent = Intent(context, LoginActivity::class.java)
                                     intent.flags =
                                         Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                    context.startActivity(intent)
+                                    context.startActivity(intent)*/
+                                    viewModel.getWeather()
                                 },
                             )
                         }

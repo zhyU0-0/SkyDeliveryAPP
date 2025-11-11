@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
 
         sharedPreferences = this.getSharedPreferences("AppData", Context.MODE_PRIVATE)
         wsViewModel = HttpViewModel(this,sharedPreferences)
-        mapViewModel = MapViewModel(this)
+        mapViewModel = MapViewModel(this,sharedPreferences)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {

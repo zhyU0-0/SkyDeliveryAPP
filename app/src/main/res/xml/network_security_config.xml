@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <domain-config cleartextTrafficPermitted="true">
+    <!--<domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">127.0.0.1</domain>
         <domain includeSubdomains="true">localhost</domain>
-        <domain includeSubdomains="true">10.33.57.1</domain>
-        <domain includeSubdomains="true">10.0.2.2</domain> <!-- 模拟器本地地址 -->
-        <domain includeSubdomains="true">your-local-ip</domain> <!-- 你的本地网络IP -->
+        <domain includeSubdomains="true">10.*.*.*</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain> &lt;!&ndash; 模拟器本地地址 &ndash;&gt;
+        <domain includeSubdomains="true">your-local-ip</domain> &lt;!&ndash; 你的本地网络IP &ndash;&gt;
     </domain-config>
+-->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
 </network-security-config>

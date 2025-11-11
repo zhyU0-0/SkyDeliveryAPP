@@ -52,7 +52,7 @@ class DetailActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         sharedPreferences = this.getSharedPreferences("AppData", Context.MODE_PRIVATE)
         wsViewModel = HttpViewModel(this,sharedPreferences)
-        mapViewModel = MapViewModel(this)
+        mapViewModel = MapViewModel(this,sharedPreferences)
         val orderId = intent.getIntExtra("OrderId",-1)
         Log.v("OrderId",orderId.toString())
 

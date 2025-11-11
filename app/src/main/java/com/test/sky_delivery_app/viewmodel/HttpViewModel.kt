@@ -3,6 +3,7 @@ package com.test.sky_delivery_app.viewmodel
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -27,7 +28,7 @@ import com.test.sky_delivery_app.pojo.response.LoginResult
 import com.test.sky_delivery_app.pojo.vo.DetailOrderVO
 import com.test.sky_delivery_app.websocket.OkHttpWebSocketService
 
-class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) : ViewModel() {
+class HttpViewModel(val context: Context, val shapePreferences: SharedPreferences) : ViewModel() {
 
     // 使用下划线前缀表示可变的内部状态
     private val _messageList = MutableStateFlow<List<MassageDTO>>(emptyList())
@@ -79,8 +80,10 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
         return employee
     }
 
-    fun is_auth(callback: ()-> Unit){
+    fun is_auth(callback: ()-> Unit,fail:()->Unit,finish:()->Unit){
         if(shapePreferences.getString("password","null").toString() != "null"){
+            //如果密码不为空，先进入
+            callback()
             viewModelScope.launch {
 
                 val result = authRepository.login(
@@ -90,18 +93,23 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
                 when (result) {
                     is LoginResult.Error -> {
                         Log.v("Error","Error")
+                        Log.v("Login","fail")
+                        fail()//登录失败再回来
                     }
                     LoginResult.NetworkError -> {
                         Log.v("NetworkError","NetworkError")
+                        Toast.makeText(context,"服务器未连接",Toast.LENGTH_SHORT).show()
                     }
                     is LoginResult.Success -> {
-                        callback()
+                        finish()
                         getOrder()//起身份验证作用
                         getDeliveryOrder()
                     }
                 }
             }
 
+        }else{
+            Log.v("Login","password not exist sharePreference ")
         }
     }
 
@@ -264,7 +272,7 @@ class HttpViewModel(context: Context, val shapePreferences: SharedPreferences) :
     }
 
     fun unLogin(){
-        shapePreferences.edit { putString("password", "") }
+        shapePreferences.edit { putString("password", null) }
     }
 
     fun getCompleteOrder(){

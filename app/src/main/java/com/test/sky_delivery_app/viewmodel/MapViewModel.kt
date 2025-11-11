@@ -2,9 +2,11 @@ package com.test.sky_delivery_app.viewmodel
 
 import android.Manifest
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import com.amap.api.maps.AMap
 import com.amap.api.maps.model.Poi
@@ -16,13 +18,16 @@ import com.amap.api.services.poisearch.PoiResult
 import com.amap.api.services.poisearch.PoiSearch
 import kotlin.collections.isNotEmpty
 
-class MapViewModel(val context: Context) : ViewModel(){
+class MapViewModel(val context: Context,val sharedPreferences: SharedPreferences) : ViewModel(){
 
     var goat = mutableStateOf("桂林机场")
+    var location = mutableStateOf(sharedPreferences.getString("location","广西"))
+    var car = mutableStateOf(sharedPreferences.getInt("car",0))
 
     var aMap: AMap? = null
     // 权限请求码
     val PERMISSION_REQUEST_CODE = 1001
+    val is_show_select = mutableStateOf(false)
 
     // 需要的权限列表
     val requiredPermissions = arrayOf(
@@ -42,12 +47,30 @@ class MapViewModel(val context: Context) : ViewModel(){
             val endPoi = createPoiItem(endPoint, "故宫博物院")*/
             /*val start = Poi("龙城花园", null, "B000A8UF3J")*/
             /*val end = Poi("", null, null)*/
+            //获取交通工具
+            val car = sharedPreferences.getInt("car",0)
+            var naviType = AmapNaviType.DRIVER
+            when(car){
+                0 ->{
+                    naviType = AmapNaviType.DRIVER//汽车
+                }
+                1 ->{
+                    naviType = AmapNaviType.MOTORCYCLE//摩托
+                }
+                2 ->{
+                    naviType = AmapNaviType.RIDE//自行车
+                }
+                3 ->{
+                    naviType = AmapNaviType.WALK//走路
+                }
+            }
+
             // 创建导航参数
             val naviParams = AmapNaviParams(
                 null,  // 起点
                 null,  // 途经点列表
                 end,   // 终点
-                AmapNaviType.DRIVER,  // 导航类型：驾车
+                naviType,  // 导航类型：驾车
                 AmapPageType.ROUTE    // 页面类型：路径规划
             )
 
@@ -64,8 +87,9 @@ class MapViewModel(val context: Context) : ViewModel(){
         }
     }
     fun search(){
+        val location = sharedPreferences.getString("location","广西")
         // 1. 创建查询对象
-        val query = PoiSearch.Query(goat.value, "", "广西")
+        val query = PoiSearch.Query(goat.value, "", location)
         query.pageSize = 5 // 设置每页返回数量
 
         // 2. 初始化PoiSearch对象并设置监听
@@ -96,6 +120,22 @@ class MapViewModel(val context: Context) : ViewModel(){
             }
         })
         poiSearch.searchPOIAsyn()
+    }
+
+    fun updateLocation(){
+        sharedPreferences.edit {
+            putString("location",location.value).apply()
+        }
+        Toast.makeText(context,"更改成功", Toast.LENGTH_SHORT).show()
+    }
+    fun updateCar(){
+        sharedPreferences.edit {
+            putInt("car",car.value).apply()
+        }
+        Toast.makeText(context,"更改成功", Toast.LENGTH_SHORT).show()
+    }
+    fun showSelectCar(){
+        is_show_select.value = true
     }
 
 

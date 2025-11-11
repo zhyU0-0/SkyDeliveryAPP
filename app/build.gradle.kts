@@ -88,4 +88,6 @@ dependencies {
     implementation("com.amap.api:search:9.7.0")
     /*implementation("com.amap.api:location:latest.integration")*/
     implementation("com.amap.api:navi-3dmap:latest.integration")
+
+    implementation("io.coil-kt:coil-compose:2.4.0")
 }

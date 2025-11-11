@@ -84,7 +84,7 @@ fun MainScreen(
             ) {
                 composable("orders") { OrderScreen(viewModel) }
                 composable("delivery") { DeliveryScreen(viewModel,mapViewModel) }
-                composable("user") { UserScreen(viewModel) }
+                composable("user") { UserScreen(viewModel,mapViewModel) }
             }
         }
         Box(

@@ -8,7 +8,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -67,6 +66,12 @@ class LoginActivity : ComponentActivity() {
             {
                 val intent = Intent(this, MainActivity::class.java)
                 this.startActivity(intent)
+                Log.v("Login","successful")
+            },
+            {
+                val intent = Intent(this, LoginActivity::class.java)
+                this.startActivity(intent)
+            },{
                 finish()
             }
         )
@@ -78,6 +83,9 @@ class LoginActivity : ComponentActivity() {
                         wsViewModel,
                         {
                             val intent = Intent(this, MainActivity::class.java)
+                                .apply {
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK//清空栈
+                                }
                             this.startActivity(intent)
                             finish()
                         }

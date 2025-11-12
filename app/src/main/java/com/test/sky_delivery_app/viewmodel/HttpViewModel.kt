@@ -51,7 +51,7 @@ class HttpViewModel(val context: Context, val shapePreferences: SharedPreference
     var orderMoney = mutableStateOf(0.0)
     var orderCount = mutableStateOf(0)
     var detail = mutableStateOf(DetailOrderVO(Orders(),listOf()))
-    var weather = mutableStateOf(WeatherResponse())
+
 
 
     val okHttpWebSocketService = OkHttpWebSocketService({
@@ -307,15 +307,6 @@ class HttpViewModel(val context: Context, val shapePreferences: SharedPreference
         }
     }
 
-    fun getWeather(){
-        viewModelScope.launch {
-            val data = authRepository.getWeather()
-            if(data.status == 1){
-                weather.value = data
-            }else{
-                Toast.makeText(context, "获取天气失败", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
+
 }
 

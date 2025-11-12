@@ -22,26 +22,28 @@ import com.test.sky_delivery_app.request.RetrofitClient
 import com.test.sky_delivery_app.ui.theme.SkyDeliveryAppTheme
 import com.test.sky_delivery_app.viewmodel.HttpViewModel
 import com.test.sky_delivery_app.viewmodel.MapViewModel
+import com.test.sky_delivery_app.viewmodel.WeatherViewModel
 
 class MainActivity : ComponentActivity() {
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var wsViewModel: HttpViewModel
     private lateinit var mapViewModel: MapViewModel
+    private lateinit var weatherViewModel: WeatherViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         sharedPreferences = this.getSharedPreferences("AppData", Context.MODE_PRIVATE)
         wsViewModel = HttpViewModel(this,sharedPreferences)
         mapViewModel = MapViewModel(this,sharedPreferences)
+        weatherViewModel = WeatherViewModel(this,sharedPreferences)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             MainScreen(wsViewModel,mapViewModel)
         }
+
         wsViewModel.load()
-
         mapInit()
-
+        weatherViewModel.analyzeWeatherAndNotify()
     }
 
 

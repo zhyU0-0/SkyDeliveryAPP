@@ -3,6 +3,7 @@ package com.test.sky_delivery_app.request
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import android.util.LogPrinter
 import com.google.gson.Gson
 import com.test.sky_delivery_app.R
 import com.test.sky_delivery_app.pojo.response.LoginData
@@ -13,6 +14,7 @@ import com.test.sky_delivery_app.pojo.OrderResponse
 import com.test.sky_delivery_app.pojo.Orders
 import com.test.sky_delivery_app.pojo.OrdersPageQueryDTO
 import com.test.sky_delivery_app.pojo.response.AddressBook
+import com.test.sky_delivery_app.pojo.response.PoiResponse
 import com.test.sky_delivery_app.pojo.response.WeatherResponse
 import com.test.sky_delivery_app.pojo.vo.DetailOrderVO
 import org.json.JSONArray
@@ -147,16 +149,39 @@ class Repository(
     suspend fun getWeather(): WeatherResponse{
         val key = context.getString(R.string.weather)
         return try{
-            val response = weatherService.getWeather(key,"110101","base","JSON")
+            val adCode = sharedPreferences.getString("adCode","0").toString()
+            val response = weatherService.getWeather(key,adCode,"base","JSON")
+            Log.d("getWeather::adCode",adCode)
             if(response.status == 1){
                 Log.v("getWeather",response.toString())
                 response
             }else{
                 WeatherResponse()
             }
+
         }catch (e: Exception){
             Log.e("getWeather",e.toString())
             WeatherResponse()
+        }
+    }
+
+    suspend fun getPoi(keyword: String): PoiResponse{
+        val key = context.getString(R.string.weather)
+        return try{
+            val response = weatherService.getPoi(key,keyword)
+            Log.d("getPoi::Poi",response.toString())
+            if(response.pois.size>0){
+                Log.v("getPoi",response.toString())
+                val adCode = response.pois[0]?.adcode
+                sharedPreferences.edit().putString("adCode",adCode.toString()).apply()
+                response
+            }else{
+                PoiResponse()
+            }
+
+        }catch (e: Exception){
+            Log.e("getPoi",e.toString())
+            PoiResponse()
         }
     }
 

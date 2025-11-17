@@ -103,7 +103,12 @@ class MapViewModel(val context: Context,val sharedPreferences: SharedPreferences
                         val firstPoi = pois[0]
                         val poiId = firstPoi.poiId
                         val poiName = firstPoi.title
-                        Log.d("POI_SEARCH", "找到POI: $poiName, ID: $poiId")
+                        val adCode = firstPoi.adCode
+                        Log.d("POI_SEARCH", "找到POI: $poiName, ID: $poiId,AdCode: $adCode")
+                        sharedPreferences.edit {
+                            putString("adCode",adCode).apply()
+                        }
+                        Log.d("search",adCode)
                         // 接下来可以使用这个poiId进行导航等操作
                         val end = Poi(poiName, null, poiId)
                         startNavigation(end)

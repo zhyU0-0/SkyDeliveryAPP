@@ -52,7 +52,7 @@ object RetrofitClient {
     }
 
     private val retrofit_weather: Retrofit = Retrofit.Builder()
-        .baseUrl("https://restapi.amap.com/v3/")
+        .baseUrl("https://restapi.amap.com/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 

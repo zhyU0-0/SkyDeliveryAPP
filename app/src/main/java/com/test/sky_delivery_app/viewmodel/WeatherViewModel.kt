@@ -33,8 +33,9 @@ class WeatherViewModel(val context: Context,val sharedPreferences: SharedPrefere
     )
 
     suspend fun getWeather(){
+        authRepository.getPoi(sharedPreferences.getString("location","广西").toString())
         val data = authRepository.getWeather()
-        if(data.status == 1){
+        if(data.status == 1 && data.lives.size>0){
             weather.value = data
         }else{
             Toast.makeText(context, "获取天气失败", Toast.LENGTH_SHORT).show()

@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
+import androidx.core.view.WindowCompat
 import com.amap.api.location.AMapLocationClient
 import com.test.sky_delivery_app.request.RetrofitClient
 import com.test.sky_delivery_app.ui.theme.SkyDeliveryAppTheme
@@ -32,14 +33,20 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         sharedPreferences = this.getSharedPreferences("AppData", Context.MODE_PRIVATE)
-        wsViewModel = HttpViewModel(this,sharedPreferences)
-        mapViewModel = MapViewModel(this,sharedPreferences)
-        weatherViewModel = WeatherViewModel(this,sharedPreferences)
+        wsViewModel = HttpViewModel(sharedPreferences)
+        mapViewModel = MapViewModel(sharedPreferences)
+        weatherViewModel = WeatherViewModel(sharedPreferences)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             MainScreen(wsViewModel,mapViewModel)
         }
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        // 2. （可选）设置状态栏和导航栏为透明，以获得更彻底的沉浸效果
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
+        window.navigationBarColor = android.graphics.Color.TRANSPARENT
 
         wsViewModel.load()
         mapInit()

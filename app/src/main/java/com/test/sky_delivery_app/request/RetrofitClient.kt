@@ -15,7 +15,7 @@ object RetrofitClient {
     }
 
     private fun getBaseUrl(): String {
-        return "http://" + sharedPreferences.getString("ip", "10.0.2.2:8088") + "/"
+        return "http://" + sharedPreferences.getString("ip", "172.16.22.70:8088") + "/"
     }
 
     private val okHttpClient: OkHttpClient by lazy {

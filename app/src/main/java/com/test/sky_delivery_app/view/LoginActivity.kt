@@ -61,7 +61,7 @@ class LoginActivity : ComponentActivity() {
         RetrofitClient.init(
             sharedPreferences
         )
-        wsViewModel = HttpViewModel(this,sharedPreferences)
+        wsViewModel = HttpViewModel(sharedPreferences)
         wsViewModel.is_auth(
             {
                 val intent = Intent(this, MainActivity::class.java)

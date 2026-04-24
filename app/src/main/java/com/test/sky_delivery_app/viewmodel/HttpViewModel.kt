@@ -24,12 +24,13 @@ import kotlin.collections.forEach
 import kotlin.collections.minus
 import kotlin.collections.plus
 import androidx.core.content.edit
+import com.test.sky_delivery_app.SkyDeliveryApplication
 import com.test.sky_delivery_app.pojo.response.LoginResult
 import com.test.sky_delivery_app.pojo.response.WeatherResponse
 import com.test.sky_delivery_app.pojo.vo.DetailOrderVO
 import com.test.sky_delivery_app.websocket.OkHttpWebSocketService
 
-class HttpViewModel(val context: Context, val shapePreferences: SharedPreferences) : ViewModel() {
+class HttpViewModel(val shapePreferences: SharedPreferences) : ViewModel() {
 
     // 使用下划线前缀表示可变的内部状态
     private val _messageList = MutableStateFlow<List<MassageDTO>>(emptyList())
@@ -51,7 +52,7 @@ class HttpViewModel(val context: Context, val shapePreferences: SharedPreference
     var orderMoney = mutableStateOf(0.0)
     var orderCount = mutableStateOf(0)
     var detail = mutableStateOf(DetailOrderVO(Orders(),listOf()))
-
+    fun getAppContext() = SkyDeliveryApplication.instance.getAppContext()
 
 
     val okHttpWebSocketService = OkHttpWebSocketService({
@@ -66,7 +67,7 @@ class HttpViewModel(val context: Context, val shapePreferences: SharedPreference
     })
 
     private val authRepository = Repository(
-        context,
+        getAppContext(),
         RetrofitClient.authApiService,
         RetrofitClient.weatherService,
         shapePreferences
@@ -104,7 +105,7 @@ class HttpViewModel(val context: Context, val shapePreferences: SharedPreference
                     }
                     LoginResult.NetworkError -> {
                         Log.v("NetworkError","NetworkError")
-                        Toast.makeText(context,"服务器未连接",Toast.LENGTH_SHORT).show()
+                        Toast.makeText(getAppContext(),"服务器未连接",Toast.LENGTH_SHORT).show()
                     }
                     is LoginResult.Success -> {
                         finish()
@@ -246,14 +247,12 @@ class HttpViewModel(val context: Context, val shapePreferences: SharedPreference
     }
 
     fun delivery(id:Int){
-
         viewModelScope.launch {
             val result = authRepository.delivery(id)
             if(result!= -1){
                 getOrder()
             }
         }
-
     }
 
     fun complete(id: Int){

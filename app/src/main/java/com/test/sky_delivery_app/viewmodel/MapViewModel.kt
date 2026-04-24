@@ -16,9 +16,10 @@ import com.amap.api.navi.AmapNaviType
 import com.amap.api.navi.AmapPageType
 import com.amap.api.services.poisearch.PoiResult
 import com.amap.api.services.poisearch.PoiSearch
+import com.test.sky_delivery_app.SkyDeliveryApplication
 import kotlin.collections.isNotEmpty
 
-class MapViewModel(val context: Context,val sharedPreferences: SharedPreferences) : ViewModel(){
+class MapViewModel(val sharedPreferences: SharedPreferences) : ViewModel(){
 
     var goat = mutableStateOf("桂林机场")
     var location = mutableStateOf(sharedPreferences.getString("location","广西"))
@@ -35,7 +36,7 @@ class MapViewModel(val context: Context,val sharedPreferences: SharedPreferences
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
-
+    fun getAppContext() = SkyDeliveryApplication.instance.getAppContext()
     private fun startNavigation(end:Poi) {
         try {
             /*// 创建起点PoiItem（天安门）
@@ -76,13 +77,13 @@ class MapViewModel(val context: Context,val sharedPreferences: SharedPreferences
 
             // 启动导航页面
             AmapNaviPage.getInstance().showRouteActivity(
-                context,
+                getAppContext(),
                 naviParams,
                 null  // 导航监听器
             )
 
         } catch (e: Exception) {
-            Toast.makeText(context, "启动导航失败: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(getAppContext(), "启动导航失败: ${e.message}", Toast.LENGTH_SHORT).show()
             e.printStackTrace()
         }
     }
@@ -93,7 +94,7 @@ class MapViewModel(val context: Context,val sharedPreferences: SharedPreferences
         query.pageSize = 5 // 设置每页返回数量
 
         // 2. 初始化PoiSearch对象并设置监听
-        val poiSearch = PoiSearch(context, query)
+        val poiSearch = PoiSearch(getAppContext(), query)
         poiSearch.setOnPoiSearchListener(object : PoiSearch.OnPoiSearchListener {
             override fun onPoiSearched(poiResult: PoiResult?, errorCode: Int) {
                 if (errorCode == 1000 && poiResult != null) { // 1000表示成功
@@ -131,13 +132,13 @@ class MapViewModel(val context: Context,val sharedPreferences: SharedPreferences
         sharedPreferences.edit {
             putString("location",location.value).apply()
         }
-        Toast.makeText(context,"更改成功", Toast.LENGTH_SHORT).show()
+        Toast.makeText(getAppContext(),"更改成功", Toast.LENGTH_SHORT).show()
     }
     fun updateCar(){
         sharedPreferences.edit {
             putInt("car",car.value).apply()
         }
-        Toast.makeText(context,"更改成功", Toast.LENGTH_SHORT).show()
+        Toast.makeText(getAppContext(),"更改成功", Toast.LENGTH_SHORT).show()
     }
     fun showSelectCar(){
         is_show_select.value = true

@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.test.sky_delivery_app.R
+import com.test.sky_delivery_app.SkyDeliveryApplication
 import com.test.sky_delivery_app.pojo.response.WeatherResponse
 import com.test.sky_delivery_app.request.Repository
 import com.test.sky_delivery_app.request.RetrofitClient
@@ -21,12 +22,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.lang.Thread.sleep
 
-class WeatherViewModel(val context: Context,val sharedPreferences: SharedPreferences): ViewModel() {
+class WeatherViewModel(val sharedPreferences: SharedPreferences): ViewModel() {
 
     var weather = mutableStateOf(WeatherResponse())
-
+    fun getAppContext() = SkyDeliveryApplication.instance.getAppContext()
     private val authRepository = Repository(
-        context,
+        getAppContext(),
         RetrofitClient.authApiService,
         RetrofitClient.weatherService,
         sharedPreferences
@@ -38,7 +39,7 @@ class WeatherViewModel(val context: Context,val sharedPreferences: SharedPrefere
         if(data.status == 1 && data.lives.size>0){
             weather.value = data
         }else{
-            Toast.makeText(context, "获取天气失败", Toast.LENGTH_SHORT).show()
+            Toast.makeText(getAppContext(), "获取天气失败", Toast.LENGTH_SHORT).show()
         }
     }
     private val CHANNEL_ID = "weather_alert_channel"
@@ -57,7 +58,7 @@ class WeatherViewModel(val context: Context,val sharedPreferences: SharedPrefere
         viewModelScope.launch {
             getWeather()
             Log.v("Weather", weather.value.toString())
-            val maxTemperature = context.getString(R.string.maxT)
+            val maxTemperature = getAppContext().getString(R.string.maxT)
             if(weather.value.status == 1){
                 val temperature = weather.value.lives[0].temperature.toFloat()
                 val isRaining = weather.value.lives[0].weather == "雨"
@@ -81,7 +82,7 @@ class WeatherViewModel(val context: Context,val sharedPreferences: SharedPrefere
             }
 
             val notificationManager: NotificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                getAppContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
     }
@@ -97,14 +98,14 @@ class WeatherViewModel(val context: Context,val sharedPreferences: SharedPrefere
             "天气提醒：当前正在下雨，请注意出行安全！"
         }
 
-        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(getAppContext(), CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_alert) // 使用系统默认图标
             .setContentTitle("天气提醒")
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
 
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getAppContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(notificationId++, builder.build())
     }
 
